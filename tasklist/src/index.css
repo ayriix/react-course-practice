@@ -272,6 +272,12 @@ h2 {
 .completed-task-list .task-item {
   animation: fade-in 0.5s ease-in-out;
 }
+.task-item.overdue {
+  opacity: 0.8;
+  background-color: #f1eaec;
+  color: #c20000;
+  border-left: 6px solid #f44336;
+}
 
 @keyframes fade-in {
   from {

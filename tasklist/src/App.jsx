@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function App() {
   const [sortType, setSortType] = useState("date"); // priority
@@ -9,6 +9,17 @@ function App() {
     tasks: true,
     completedTasks: true,
   });
+  const [currentTime, setCurrentTime] = useState(new Date());
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, []);
 
   function addTask(task) {
     setTasks([...tasks, { ...task, completed: false, id: Date.now() }]);
@@ -101,6 +112,7 @@ function App() {
             completeTask={completeTask}
             deleteTask={deleteTask}
             currentTasks={currentTasks}
+            currentTime={currentTime}
           />
         )}
       </div>
@@ -170,7 +182,7 @@ function TaskForm({ addTask }) {
     </form>
   );
 }
-function TaskList({ currentTasks, deleteTask, completeTask }) {
+function TaskList({ currentTasks, deleteTask, completeTask, currentTime }) {
   return (
     <ul className="task-list">
       {currentTasks.map((task) => (
@@ -179,6 +191,7 @@ function TaskList({ currentTasks, deleteTask, completeTask }) {
           deleteTask={deleteTask}
           task={task}
           key={task.id}
+          isDeadline={new Date(task.deadline) < currentTime}
         />
       ))}
     </ul>
@@ -194,10 +207,14 @@ function CompletedTaskList({ completedTasks, deleteTask }) {
   );
 }
 
-function TaskItem({ task, deleteTask, completeTask }) {
+function TaskItem({ task, deleteTask, completeTask, isDeadline }) {
   const { title, priority, deadline, id } = task;
   return (
-    <li className={`task-item ${priority.toLowerCase()}`}>
+    <li
+      className={`task-item ${priority.toLowerCase()} ${
+        isDeadline ? "overdue" : ""
+      }`}
+    >
       <div className="task-info">
         <h3>
           #1 {title} - <b>{priority}</b>
