@@ -58,6 +58,7 @@ function App() {
         closeModal={closeModal}
         alertModal={alertModal}
         openModal={openModal}
+        title="Universal Modal Component"
       >
         <Modal
           setIsModalOpen={setIsModalOpen}
@@ -68,13 +69,13 @@ function App() {
           title="Confirm Your Action"
           showCloseButton
         >
-          <Button variant={"closeButton"} handleClick={closeModal}>
+          <Button variant="closeButton" handleClick={closeModal}>
             &times;
           </Button>
-          <Button variant={"secondaryButton"} handleClick={closeModal}>
+          <Button variant="secondaryButton" handleClick={closeModal}>
             Cancel
           </Button>
-          <Button variant={"primaryButton"} handleClick={alertModal}>
+          <Button variant="primaryButton" handleClick={alertModal}>
             Yes, Continue
           </Button>
         </Modal>
