@@ -2,41 +2,7 @@ import { useState, useEffect } from "react";
 import "./index.css";
 import CurrenciesList from "./CurrenciesList";
 
-const KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
-const CURRENCIES = [
-  "AUD",
-  "BGN",
-  "BRL",
-  "CAD",
-  "CHF",
-  "CNY",
-  "CZK",
-  "DKK",
-  "EUR",
-  "GBP",
-  "HKD",
-  "HUF",
-  "IDR",
-  "ILS",
-  "INR",
-  "ISK",
-  "JPY",
-  "KRW",
-  "MXN",
-  "MYR",
-  "NOK",
-  "NZD",
-  "PHP",
-  "PLN",
-  "RON",
-  "SEK",
-  "SGD",
-  "THB",
-  "TRY",
-  "USD",
-  "ZAR",
-];
-// `https://api.frankfurter.app/latest?amount={amount}&from={baseCurrency}&to={targetCurrency}` - old api
+// const KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
 
 export default function App() {
   const [amount, setAmount] = useState(0);
@@ -44,6 +10,7 @@ export default function App() {
   const [targetCurrency, setTargetCurrency] = useState("USD");
   const [converted, setConverted] = useState("");
   const [error, setError] = useState(null);
+  const [currencies, setCurrencies] = useState([]);
 
   useEffect(() => {
     if (!amount) {
@@ -65,10 +32,6 @@ export default function App() {
         );
         const data = await response.json();
         console.log(data.rates);
-
-        // if (!response.ok || !data.success) {
-        //   throw new Error("Network error.");
-        // }
         setError(null);
 
         const formatted = new Intl.NumberFormat("en-US", {
@@ -87,6 +50,15 @@ export default function App() {
 
     getRates();
   }, [amount, baseCurrency, targetCurrency]);
+
+  useEffect(() => {
+    async function getCurrencies() {
+      const res = await fetch("https://api.frankfurter.app/currencies");
+      const data = await res.json();
+      setCurrencies(Object.keys(data));
+    }
+    getCurrencies();
+  }, []);
 
   function renderError() {
     return <p className="error">{error}</p>;
@@ -108,7 +80,7 @@ export default function App() {
           />
           <div className="currency-row">
             <CurrenciesList
-              currencies={CURRENCIES}
+              currencies={currencies}
               value={baseCurrency}
               handleCurrency={setBaseCurrency}
             />
@@ -122,7 +94,7 @@ export default function App() {
               ⇅
             </span>
             <CurrenciesList
-              currencies={CURRENCIES}
+              currencies={currencies}
               value={targetCurrency}
               handleCurrency={setTargetCurrency}
             />
