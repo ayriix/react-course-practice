@@ -5,12 +5,22 @@ import CurrenciesList from "./CurrenciesList";
 // const KEY = import.meta.env.VITE_EXCHANGE_API_KEY;
 
 export default function App() {
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState(1);
   const [baseCurrency, setBaseCurrency] = useState("EUR");
   const [targetCurrency, setTargetCurrency] = useState("USD");
   const [converted, setConverted] = useState("");
   const [error, setError] = useState(null);
   const [currencies, setCurrencies] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleAmountLimit = (e) => {
+    const value = e.target.value;
+
+    if (value.length > 16) return;
+    const numValue = Number(value);
+    if (Number.isNaN(numValue)) return;
+    setAmount(value);
+  };
 
   useEffect(() => {
     if (!amount) {
@@ -26,12 +36,12 @@ export default function App() {
     }
 
     async function getRates() {
+      setLoading(true);
       try {
         const response = await fetch(
           `https://api.frankfurter.app/latest?amount=${amount}&from=${baseCurrency}&to=${targetCurrency}`
         );
         const data = await response.json();
-        console.log(data.rates);
         setError(null);
 
         const formatted = new Intl.NumberFormat("en-US", {
@@ -45,10 +55,15 @@ export default function App() {
       } catch {
         setError("Invalid amount! Try different value.");
         setConverted("");
+      } finally {
+        setLoading(false);
       }
     }
+    const debounceTimer = setTimeout(() => {
+      getRates();
+    }, 500);
 
-    getRates();
+    return () => clearTimeout(debounceTimer);
   }, [amount, baseCurrency, targetCurrency]);
 
   useEffect(() => {
@@ -63,6 +78,9 @@ export default function App() {
   function renderError() {
     return <p className="error">{error}</p>;
   }
+  function renderLoading() {
+    return <p className="loading">Loading...</p>;
+  }
 
   return (
     <div className="page">
@@ -72,11 +90,11 @@ export default function App() {
           <input
             type="number"
             name="amount"
-            min="0"
+            min="1"
             inputMode="decimal"
             value={amount}
             placeholder="Enter amount"
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={handleAmountLimit}
           />
           <div className="currency-row">
             <CurrenciesList
@@ -101,7 +119,8 @@ export default function App() {
           </div>
 
           {error && renderError()}
-          {!error && converted && (
+          {loading && renderLoading()}
+          {!error && !loading && converted && (
             <div className="result">
               <span className="label">Converted</span>
               <span className="value">{converted}</span>
